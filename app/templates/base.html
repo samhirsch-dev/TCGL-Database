@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}TCG Log Vault{% endblock %}</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161922;
+    --border: #262b38;
+    --text: #e6e8ee;
+    --muted: #9aa1b1;
+    --accent: #5b8def;
+    --win: #3fb950;
+    --loss: #f85149;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.1rem; margin: 2rem 0 .75rem; }
+  .subtitle { color: var(--muted); margin: 0 0 1.5rem; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .banner {
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: .9rem;
+  }
+  .banner.error { background: #3a1414; border: 1px solid #6e2323; color: #ffb4b4; }
+  .banner.success { background: #123a1c; border: 1px solid #205a2f; color: #b7f0c2; }
+  label { display: block; font-size: .85rem; color: var(--muted); margin: .9rem 0 .3rem; }
+  label:first-child { margin-top: 0; }
+  input[type=text], input[type=date], textarea, select {
+    width: 100%;
+    background: #0d0f14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: .55rem .65rem;
+    font: inherit;
+  }
+  textarea {
+    min-height: 220px;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .8rem;
+  }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .row > div { flex: 1 1 200px; }
+  button, .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: .55rem 1.1rem;
+    font: inherit;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+  }
+  button.secondary, .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  button.danger, .btn.danger { background: #3a1414; border: 1px solid #6e2323; color: #ffb4b4; }
+  .actions { display: flex; gap: .6rem; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; }
+  tr:hover td { background: #ffffff06; }
+  .result { font-weight: 600; padding: .1rem .5rem; border-radius: 999px; font-size: .75rem; }
+  .result.W { background: #123a1c; color: var(--win); }
+  .result.L { background: #3a1414; color: var(--loss); }
+  .result.none { background: #262b38; color: var(--muted); }
+  .stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .stat .n { font-size: 1.4rem; font-weight: 600; }
+  .stat .label { color: var(--muted); font-size: .8rem; }
+  .muted { color: var(--muted); }
+  .raw-log {
+    white-space: pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .8rem;
+    background: #0d0f14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    max-height: 500px;
+    overflow: auto;
+  }
+  .warnings { color: #e3b341; font-size: .85rem; }
+  footer { margin-top: 3rem; color: var(--muted); font-size: .8rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><a href="/" style="color:inherit;text-decoration:none;">TCG Log Vault</a></h1>
+  <p class="subtitle">Long-term storage for Pok&eacute;mon TCG Live battle logs.</p>
+  {% block content %}{% endblock %}
+  <footer>The raw log is the source of truth. <a href="/export.csv">Export CSV</a> &middot; <a href="/api/games">JSON</a></footer>
+</div>
+</body>
+</html>

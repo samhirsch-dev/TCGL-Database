@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+{% if error %}<div class="banner error">{{ error }}</div>{% endif %}
+{% if saved_id %}<div class="banner success">Saved as game #{{ saved_id }}. <a href="/games/{{ saved_id }}">View it</a>.</div>{% endif %}
+
+<div class="panel">
+  <div class="stats">
+    <div class="stat"><div class="n">{{ stats.games }}</div><div class="label">Games</div></div>
+    <div class="stat"><div class="n">{{ stats.wins }}</div><div class="label">Wins</div></div>
+    <div class="stat"><div class="n">{{ stats.losses }}</div><div class="label">Losses</div></div>
+    {% if stats.games %}
+    <div class="stat"><div class="n">{{ "%.1f"|format(100.0 * stats.wins / stats.games) }}%</div><div class="label">Win rate</div></div>
+    {% endif %}
+  </div>
+</div>
+
+<h2>Add a game</h2>
+<form class="panel" method="post" action="/games">
+  <label for="raw_log">Battle log</label>
+  <textarea id="raw_log" name="raw_log" placeholder="Paste the full exported log here" required></textarea>
+
+  <div class="row">
+    <div>
+      <label for="username">Your username (as it appears in the log)</label>
+      <input type="text" id="username" name="username" value="{{ last_username }}" required>
+    </div>
+    <div>
+      <label for="date">Date played</label>
+      <input type="date" id="date" name="date" value="{{ today }}">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label for="players_deck">Your deck</label>
+      <input type="text" id="players_deck" name="players_deck" placeholder="e.g. Dragapult ex">
+    </div>
+    <div>
+      <label for="players_variant">Your variant</label>
+      <input type="text" id="players_variant" name="players_variant" placeholder="e.g. Dusknoir">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label for="opponents_deck">Opponent's deck</label>
+      <input type="text" id="opponents_deck" name="opponents_deck">
+    </div>
+    <div>
+      <label for="opponents_variant">Opponent's variant</label>
+      <input type="text" id="opponents_variant" name="opponents_variant">
+    </div>
+  </div>
+
+  <label for="result">Result</label>
+  <select id="result" name="result">
+    <option value="">Read it from the log</option>
+    <option value="W">W</option>
+    <option value="L">L</option>
+  </select>
+
+  <div class="actions">
+    <button type="submit">Save game</button>
+  </div>
+</form>
+
+<h2>Recent games</h2>
+{% if games %}
+<div class="panel" style="padding:0; overflow-x:auto;">
+<table>
+<thead><tr><th>Date</th><th>Your deck</th><th>Opponent</th><th>Result</th><th>Turns</th></tr></thead>
+<tbody>
+{% for g in games %}
+<tr>
+  <td><a href="/games/{{ g.id }}">{{ g.date }}</a></td>
+  <td>{{ g.players_deck or "—" }}{% if g.players_variant %} <span class="muted">/ {{ g.players_variant }}</span>{% endif %}</td>
+  <td>{{ g.opponents_deck or "—" }}{% if g.opponents_variant %} <span class="muted">/ {{ g.opponents_variant }}</span>{% endif %}</td>
+  <td>{% if g.result %}<span class="result {{ g.result }}">{{ g.result }}</span>{% else %}<span class="result none">—</span>{% endif %}</td>
+  <td>{{ g.turns or "—" }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<p class="muted">No games saved yet.</p>
+{% endif %}
+{% endblock %}

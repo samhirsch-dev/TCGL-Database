@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# The archive itself. Never commit real battle logs or your database.
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

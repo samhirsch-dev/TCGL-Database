@@ -1,0 +1,15 @@
+services:
+  tcg-log-vault:
+    build: .
+    image: tcg-log-vault:latest
+    container_name: tcg-log-vault
+    restart: unless-stopped
+    environment:
+      TCG_DB_PATH: /data/games.db
+    volumes:
+      # Left side: a directory on the RAID 1 array. Change it to your mount.
+      - /mnt/raid/tcg-log-vault:/data
+    ports:
+      # Bound to localhost only: Cloudflare Tunnel reaches it from the host.
+      # Use "8088:8000" instead if you want it on the LAN directly.
+      - "127.0.0.1:8088:8000"

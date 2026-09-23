@@ -1,0 +1,282 @@
+Setup
+VoicesConsume chose tails for the opening coin flip.
+super-victini13 won the coin toss.
+super-victini13 decided to go first.
+VoicesConsume drew 7 cards for the opening hand.
+- 7 drawn cards.
+super-victini13 drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Cranidos, Hilda, Ultra Ball, Lillie's Determination, Ultra Ball, Basic Fighting Energy, Ultra Ball
+super-victini13 took a mulligan.
+- Cards revealed from Mulligan 1
+   • Cranidos, Hilda, Ultra Ball, Lillie's Determination, Ultra Ball, Basic Fighting Energy, Ultra Ball
+super-victini13 took 3 mulligans.
+- Cards revealed from Mulligan 2
+   • Ultra Ball, Rampardos ex, Antique Armor Fossil, Cranidos, Colress's Tenacity, Boss's Orders, Hilda
+- Cards revealed from Mulligan 3
+   • Boss's Orders, Boss's Orders, Pokégear 3.0, Premium Power Pro, Premium Power Pro, Antique Skull Fossil, Rare Candy
+VoicesConsume drew 2 more cards because super-victini13 took at least 1 mulligan.
+- VoicesConsume drew 2 cards.
+VoicesConsume played Toxel to the Active Spot.
+VoicesConsume played Toxel to the Bench.
+VoicesConsume played Shaymin to the Bench.
+super-victini13 played Shaymin to the Active Spot.
+
+super-victini13's Turn
+super-victini13 drew Ultra Ball.
+super-victini13 played Fossil Quarry to the Stadium spot.
+super-victini13 played Fossil Quarry.
+- super-victini13 drew 2 cards and played them to the Bench.
+   • Antique Armor Fossil, Antique Skull Fossil
+- super-victini13 shuffled their deck.
+super-victini13 attached Basic Fighting Energy to Antique Skull Fossil on the Bench.
+super-victini13 ended their turn.
+
+VoicesConsume's Turn
+VoicesConsume drew a card.
+VoicesConsume attached Basic Darkness Energy to Toxel on the Bench.
+VoicesConsume played Poké Pad.
+- VoicesConsume drew Munkidori.
+- VoicesConsume shuffled their deck.
+VoicesConsume played Munkidori to the Bench.
+VoicesConsume played Ultra Ball.
+- VoicesConsume discarded 2 cards.
+   • Buddy-Buddy Poffin, Lillie's Determination
+- VoicesConsume drew Toxtricity.
+- VoicesConsume shuffled their deck.
+VoicesConsume ended their turn.
+
+super-victini13's Turn
+super-victini13 drew Ultra Ball.
+super-victini13 evolved Antique Armor Fossil to Shieldon on the Bench.
+super-victini13 played Fossil Quarry.
+- super-victini13 drew 2 cards and played them to the Bench.
+   • Antique Armor Fossil, Antique Skull Fossil
+- super-victini13 shuffled their deck.
+super-victini13 played Hilda.
+- super-victini13 drew 2 cards.
+   • Cranidos, Rocky Fighting Energy
+- super-victini13 shuffled their deck.
+super-victini13 evolved Antique Skull Fossil to Cranidos on the Bench.
+super-victini13 attached Rocky Fighting Energy to Cranidos on the Bench.
+super-victini13 ended their turn.
+
+VoicesConsume's Turn
+VoicesConsume drew a card.
+VoicesConsume evolved Toxel to Toxtricity on the Bench.
+VoicesConsume played Lillie's Determination.
+- VoicesConsume shuffled 2 cards into their deck.
+- VoicesConsume drew 8 cards.
+VoicesConsume played Munkidori to the Bench.
+VoicesConsume attached Basic Darkness Energy to Munkidori on the Bench.
+VoicesConsume's Toxtricity used Sinister Surge.
+- VoicesConsume attached Basic Darkness Energy to Toxtricity on the Bench.
+- VoicesConsume shuffled their deck.
+- VoicesConsume put 2 damage counters on VoicesConsume's Toxtricity.
+VoicesConsume's Munkidori used Adrena-Brain.
+- VoicesConsume moved 2 damage counters from VoicesConsume's Toxtricity to VoicesConsume's Shaymin.
+VoicesConsume ended their turn.
+
+super-victini13's Turn
+super-victini13 drew Cinderace.
+super-victini13 played Fossil Quarry.
+- super-victini13 drew Antique Skull Fossil and played it to the Bench.
+- super-victini13 shuffled their deck.
+super-victini13 played Ultra Ball.
+- super-victini13 discarded 2 cards.
+   • Ultra Ball, Cinderace
+- super-victini13 drew Rampardos ex.
+- super-victini13 shuffled their deck.
+super-victini13 evolved Cranidos to Rampardos ex on the Bench.
+super-victini13 played Switch.
+- super-victini13's Rampardos ex was switched with super-victini13's Shaymin to become the Active Pokémon.
+super-victini13's Rampardos ex is now in the Active Spot.
+super-victini13 played Boss's Orders.
+- VoicesConsume's Munkidori was switched with VoicesConsume's Toxel to become the Active Pokémon.
+VoicesConsume's Munkidori is now in the Active Spot.
+super-victini13's Rampardos ex used Rowdy Hammer on VoicesConsume’s Munkidori for 120 damage. VoicesConsume's Munkidori took -30 less damage because of Fighting Resistance.
+- Damage breakdown:
+   • Base damage: 150 damage
+   • Resistance to Fighting: -30 damage
+   • Total damage: 120 damage
+
+VoicesConsume's Munkidori was Knocked Out!
+Basic Darkness Energy was discarded from VoicesConsume's Munkidori.
+super-victini13 took a Prize card.
+Shieldon was added to super-victini13's hand.
+VoicesConsume's Toxtricity is now in the Active Spot.
+
+VoicesConsume's Turn
+VoicesConsume drew a card.
+VoicesConsume attached Basic Darkness Energy to Munkidori on the Bench.
+VoicesConsume's Toxtricity used Sinister Surge.
+- VoicesConsume attached Basic Darkness Energy to Toxel on the Bench.
+- VoicesConsume shuffled their deck.
+- VoicesConsume put 2 damage counters on VoicesConsume's Toxel.
+VoicesConsume's Munkidori used Adrena-Brain.
+- VoicesConsume moved 2 damage counters from VoicesConsume's Toxel to VoicesConsume's Rampardos ex.
+VoicesConsume played Munkidori to the Bench.
+VoicesConsume retreated Toxtricity to the Bench.
+- 2 cards were discarded from VoicesConsume's Toxtricity.
+   • Basic Darkness Energy, Basic Darkness Energy
+VoicesConsume's Shaymin is now in the Active Spot.
+VoicesConsume played Energy Recycler.
+- VoicesConsume shuffled 3 cards into their deck.
+   • Basic Darkness Energy, Basic Darkness Energy, Basic Darkness Energy
+VoicesConsume played Boss's Orders.
+- super-victini13's Shaymin was switched with super-victini13's Rampardos ex to become the Active Pokémon.
+super-victini13's Shaymin is now in the Active Spot.
+VoicesConsume ended their turn.
+
+super-victini13's Turn
+super-victini13 drew Ultra Ball.
+super-victini13 evolved Antique Armor Fossil to Shieldon on the Bench.
+super-victini13 ended their turn.
+
+VoicesConsume's Turn
+VoicesConsume drew a card.
+VoicesConsume played Team Rocket's Factory to the Stadium spot.
+- super-victini13 discarded Fossil Quarry.
+VoicesConsume played Lillie's Determination.
+- VoicesConsume shuffled 2 cards into their deck.
+- VoicesConsume drew 8 cards.
+VoicesConsume attached Basic Darkness Energy to Munkidori on the Bench.
+VoicesConsume played Ultra Ball.
+- VoicesConsume discarded 2 cards.
+   • Toxel, Team Rocket's Petrel
+- VoicesConsume drew Mega Absol ex.
+- VoicesConsume shuffled their deck.
+VoicesConsume's Toxtricity used Sinister Surge.
+- VoicesConsume attached Basic Darkness Energy to Toxtricity on the Bench.
+- VoicesConsume shuffled their deck.
+- VoicesConsume put 2 damage counters on VoicesConsume's Toxtricity.
+VoicesConsume's Munkidori used Adrena-Brain.
+- VoicesConsume moved 2 damage counters from VoicesConsume's Toxtricity to VoicesConsume's Rampardos ex.
+VoicesConsume ended their turn.
+
+super-victini13's Turn
+super-victini13 drew Basic Fighting Energy.
+super-victini13 attached Basic Fighting Energy to Shaymin in the Active Spot.
+super-victini13 retreated Shaymin to the Bench.
+- Basic Fighting Energy was discarded from super-victini13's Shaymin.
+super-victini13's Rampardos ex is now in the Active Spot.
+super-victini13's Rampardos ex used Rowdy Hammer on VoicesConsume’s Shaymin for 150 damage.
+VoicesConsume's Shaymin was Knocked Out!
+super-victini13 took a Prize card.
+Fossil Quarry was added to super-victini13's hand.
+VoicesConsume's Toxel is now in the Active Spot.
+
+VoicesConsume's Turn
+VoicesConsume drew a card.
+VoicesConsume played Team Rocket's Petrel.
+- VoicesConsume drew Poké Pad.
+- VoicesConsume shuffled their deck.
+VoicesConsume played Poké Pad.
+- VoicesConsume drew Toxtricity.
+- VoicesConsume shuffled their deck.
+VoicesConsume retreated Toxel to the Bench.
+- Basic Darkness Energy was discarded from VoicesConsume's Toxel.
+VoicesConsume's Munkidori is now in the Active Spot.
+VoicesConsume evolved Toxel to Toxtricity on the Bench.
+VoicesConsume's Toxtricity used Sinister Surge.
+- VoicesConsume attached Basic Darkness Energy to Toxtricity on the Bench.
+- VoicesConsume shuffled their deck.
+- VoicesConsume put 2 damage counters on VoicesConsume's Toxtricity.
+VoicesConsume's Toxtricity used Sinister Surge.
+- VoicesConsume attached Basic Darkness Energy to Toxtricity on the Bench.
+- VoicesConsume shuffled their deck.
+- VoicesConsume put 2 damage counters on VoicesConsume's Toxtricity.
+VoicesConsume played Team Rocket's Factory.
+- VoicesConsume drew 2 cards.
+VoicesConsume's Munkidori used Adrena-Brain.
+- VoicesConsume moved 2 damage counters from VoicesConsume's Toxtricity to VoicesConsume's Rampardos ex.
+VoicesConsume's Munkidori used Adrena-Brain.
+- VoicesConsume moved 2 damage counters from VoicesConsume's Toxtricity to VoicesConsume's Shieldon.
+VoicesConsume ended their turn.
+
+super-victini13's Turn
+super-victini13 drew Colress's Tenacity.
+super-victini13 played Colress's Tenacity.
+- super-victini13 drew 2 cards.
+   • Grand Tree, Basic Fighting Energy
+- super-victini13 shuffled their deck.
+super-victini13 played Grand Tree to the Stadium spot.
+- VoicesConsume discarded Team Rocket's Factory.
+super-victini13 played Grand Tree.
+- super-victini13 evolved Antique Skull Fossil to Cranidos on the Bench.
+- super-victini13 evolved Cranidos to Rampardos ex on the Bench.
+- super-victini13 shuffled their deck.
+super-victini13 attached Basic Fighting Energy to Rampardos ex on the Bench.
+super-victini13's Rampardos ex used Rowdy Hammer on VoicesConsume’s Munkidori for 270 damage. VoicesConsume's Munkidori took -30 less damage because of Fighting Resistance.
+- Damage breakdown:
+   • Base damage: 150 damage
+   • (Attack) Rowdy Hammer: 150 damage
+   • Resistance to Fighting: -30 damage
+   • Total damage: 270 damage
+
+VoicesConsume's Munkidori was Knocked Out!
+Basic Darkness Energy was discarded from VoicesConsume's Munkidori.
+super-victini13 took a Prize card.
+Basic Fighting Energy was added to super-victini13's hand.
+VoicesConsume's Munkidori is now in the Active Spot.
+
+VoicesConsume's Turn
+VoicesConsume drew a card.
+VoicesConsume attached Air Balloon to Munkidori in the Active Spot.
+VoicesConsume played Mega Absol ex to the Bench.
+VoicesConsume retreated Munkidori to the Bench.
+VoicesConsume's Mega Absol ex is now in the Active Spot.
+VoicesConsume's Toxtricity used Sinister Surge.
+- VoicesConsume attached Basic Darkness Energy to Toxtricity on the Bench.
+- VoicesConsume shuffled their deck.
+- VoicesConsume put 2 damage counters on VoicesConsume's Toxtricity.
+VoicesConsume's Toxtricity used Sinister Surge.
+- VoicesConsume attached Basic Darkness Energy to Toxtricity on the Bench.
+- VoicesConsume shuffled their deck.
+- VoicesConsume put 2 damage counters on VoicesConsume's Toxtricity.
+VoicesConsume played Energy Switch.
+- VoicesConsume attached Basic Darkness Energy to Mega Absol ex in the Active Spot.
+VoicesConsume played Energy Switch.
+- VoicesConsume attached Basic Darkness Energy to Mega Absol ex in the Active Spot.
+VoicesConsume played Lillie's Determination.
+- VoicesConsume shuffled 3 cards into their deck.
+- VoicesConsume drew 8 cards.
+VoicesConsume played Night Stretcher.
+- VoicesConsume moved VoicesConsume's Munkidori to their hand.
+VoicesConsume played Munkidori to the Bench.
+VoicesConsume attached Basic Darkness Energy to Munkidori on the Bench.
+VoicesConsume's Munkidori used Adrena-Brain.
+- VoicesConsume moved 2 damage counters from VoicesConsume's Toxtricity to VoicesConsume's Shieldon.
+VoicesConsume's Munkidori used Adrena-Brain.
+- VoicesConsume moved 2 damage counters from VoicesConsume's Toxtricity to VoicesConsume's Shieldon.
+VoicesConsume's Mega Absol ex used Terminal Period.
+Rocky Fighting Energy was activated.
+- Effects of Terminal Period did not affect Rampardos ex.
+
+super-victini13's Turn
+super-victini13 drew Night Stretcher.
+super-victini13 played Grand Tree.
+- super-victini13 evolved Antique Skull Fossil to Cranidos on the Bench.
+- super-victini13 evolved Cranidos to Rampardos ex on the Bench.
+- super-victini13 shuffled their deck.
+super-victini13 played Ultra Ball.
+- super-victini13 discarded 2 cards.
+   • Night Stretcher, Fossil Quarry
+- super-victini13 drew Bastiodon.
+- super-victini13 shuffled their deck.
+super-victini13 evolved Shieldon to Bastiodon on the Bench.
+super-victini13 attached Basic Fighting Energy to Rampardos ex on the Bench.
+super-victini13's Rampardos ex used Rowdy Hammer on VoicesConsume’s Mega Absol ex for 300 damage.
+- Damage breakdown:
+   • Base damage: 150 damage
+   • (Attack) Rowdy Hammer: 150 damage
+   • Total damage: 300 damage
+
+VoicesConsume's Mega Absol ex was Knocked Out!
+- 2 cards were discarded from VoicesConsume's Mega Absol ex.
+   • Basic Darkness Energy, Basic Darkness Energy
+super-victini13 took 3 Prize cards.
+Lillie's Determination was added to super-victini13's hand.
+Basic Fighting Energy was added to super-victini13's hand.
+Premium Power Pro was added to super-victini13's hand.
+All Prize cards taken. super-victini13 wins.

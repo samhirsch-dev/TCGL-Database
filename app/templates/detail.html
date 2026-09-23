@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<p><a href="/">&larr; Back to all games</a></p>
+
+<div class="panel">
+  <div class="row">
+    <div>
+      <label>Date</label>
+      <div>{{ game.date }}</div>
+    </div>
+    <div>
+      <label>Username</label>
+      <div>{{ game.username }}</div>
+    </div>
+    <div>
+      <label>Result</label>
+      <div>{% if game.result %}<span class="result {{ game.result }}">{{ game.result }}</span>{% else %}<span class="result none">Unknown</span>{% endif %}</div>
+    </div>
+    <div>
+      <label>Turns</label>
+      <div>{{ game.turns or "—" }}</div>
+    </div>
+  </div>
+</div>
+
+{% if parsed %}
+<div class="panel">
+  <h2 style="margin-top:0;">Parsed from the log</h2>
+  <div class="row">
+    <div><label>Players</label><div>{{ parsed.players | join(", ") }}</div></div>
+    <div><label>Went first</label><div>{{ parsed.first_player or "Unknown" }}</div></div>
+    <div><label>Win condition</label><div>{{ parsed.win_condition or "Unknown" }}</div></div>
+  </div>
+  <div class="row">
+    <div><label>Mulligans</label><div>{% if parsed.mulligans %}{% for p, n in parsed.mulligans.items() %}{{ p }}: {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}None{% endif %}</div></div>
+    <div><label>Prizes taken</label><div>{% for p, n in parsed.prizes_taken.items() %}{{ p }}: {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}</div></div>
+    <div><label>Knockouts suffered</label><div>{% if parsed.knockouts %}{% for p, n in parsed.knockouts.items() %}{{ p }}: {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}None{% endif %}</div></div>
+  </div>
+  {% if parsed.warnings %}
+  <p class="warnings">{% for w in parsed.warnings %}{{ w }}<br>{% endfor %}</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<h2>Edit metadata</h2>
+<form class="panel" method="post" action="/games/{{ game.id }}/edit">
+  <div class="row">
+    <div>
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" value="{{ game.date }}">
+    </div>
+    <div>
+      <label for="result">Result</label>
+      <select id="result" name="result">
+        <option value="" {% if not game.result %}selected{% endif %}>Unknown</option>
+        <option value="W" {% if game.result == "W" %}selected{% endif %}>W</option>
+        <option value="L" {% if game.result == "L" %}selected{% endif %}>L</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="players_deck">Your deck</label>
+      <input type="text" id="players_deck" name="players_deck" value="{{ game.players_deck or '' }}">
+    </div>
+    <div>
+      <label for="players_variant">Your variant</label>
+      <input type="text" id="players_variant" name="players_variant" value="{{ game.players_variant or '' }}">
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="opponents_deck">Opponent's deck</label>
+      <input type="text" id="opponents_deck" name="opponents_deck" value="{{ game.opponents_deck or '' }}">
+    </div>
+    <div>
+      <label for="opponents_variant">Opponent's variant</label>
+      <input type="text" id="opponents_variant" name="opponents_variant" value="{{ game.opponents_variant or '' }}">
+    </div>
+  </div>
+  <div class="actions">
+    <button type="submit">Save changes</button>
+    <a class="btn secondary" href="/games/{{ game.id }}/raw">View raw log (plain text)</a>
+  </div>
+</form>
+
+<form method="post" action="/games/{{ game.id }}/delete" onsubmit="return confirm('Delete this game permanently?');">
+  <button type="submit" class="danger">Delete this game</button>
+</form>
+
+<h2>Raw log</h2>
+<div class="raw-log">{{ game.raw_log }}</div>
+{% endblock %}
