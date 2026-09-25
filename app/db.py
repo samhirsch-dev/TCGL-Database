@@ -21,22 +21,9 @@ from typing import Any, Iterator, Optional
 
 DB_PATH = Path(os.environ.get("TCG_DB_PATH", "/data/games.db"))
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
-COLUMNS = [
-    "id",
-    "date",
-    "username",
-    "players_deck",
-    "players_variant",
-    "opponents_deck",
-    "opponents_variant",
-    "result",
-    "turns",
-    "log_hash",
-    "raw_log",
-    "created_at",
-]
+GAME_MODES = ("ranked", "casual")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS games (
@@ -64,6 +51,25 @@ CREATE TABLE IF NOT EXISTS schema_meta (
     value TEXT NOT NULL
 );
 """
+
+# Columns added after v1. CREATE TABLE IF NOT EXISTS never alters an existing
+# table, so init_db() adds whichever of these a database lacks. Every install,
+# new or old, gets them the same way, so they are defined only here.
+_ADDED_COLUMNS = {
+    "game_mode": "TEXT CHECK (game_mode IN ('ranked', 'casual') OR game_mode IS NULL)",
+    "rank_points": "INTEGER CHECK (rank_points >= 0 OR rank_points IS NULL)",
+}
+
+EDITABLE_FIELDS = {
+    "date",
+    "players_deck",
+    "players_variant",
+    "opponents_deck",
+    "opponents_variant",
+    "result",
+    "game_mode",
+    "rank_points",
+}
 
 
 class DuplicateLogError(ValueError):
@@ -97,6 +103,10 @@ def cursor() -> Iterator[sqlite3.Cursor]:
 def init_db() -> None:
     with cursor() as cur:
         cur.executescript(_SCHEMA)
+        existing = {row["name"] for row in cur.execute("PRAGMA table_info(games)")}
+        for name, definition in _ADDED_COLUMNS.items():
+            if name not in existing:
+                cur.execute(f"ALTER TABLE games ADD COLUMN {name} {definition}")
         cur.execute(
             "INSERT INTO schema_meta (key, value) VALUES ('schema_version', ?) "
             "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
@@ -114,6 +124,8 @@ def insert_game(game: dict[str, Any]) -> int:
         "opponents_variant",
         "result",
         "turns",
+        "game_mode",
+        "rank_points",
         "log_hash",
         "raw_log",
     ]
@@ -135,7 +147,8 @@ def list_games(limit: int = 100, offset: int = 0) -> list[sqlite3.Row]:
     with cursor() as cur:
         return cur.execute(
             "SELECT id, date, username, players_deck, players_variant, "
-            "opponents_deck, opponents_variant, result, turns, created_at "
+            "opponents_deck, opponents_variant, result, turns, game_mode, "
+            "rank_points, created_at "
             "FROM games ORDER BY date DESC, id DESC LIMIT ? OFFSET ?",
             (limit, offset),
         ).fetchall()
@@ -154,19 +167,7 @@ def delete_game(game_id: int) -> bool:
 
 def update_game(game_id: int, fields: dict[str, Any]) -> bool:
     """Update editable metadata. The raw log and hash are never changed."""
-    editable = {
-        k: v
-        for k, v in fields.items()
-        if k
-        in {
-            "date",
-            "players_deck",
-            "players_variant",
-            "opponents_deck",
-            "opponents_variant",
-            "result",
-        }
-    }
+    editable = {k: v for k, v in fields.items() if k in EDITABLE_FIELDS}
     if not editable:
         return False
     assignments = ", ".join(f"{k} = ?" for k in editable)

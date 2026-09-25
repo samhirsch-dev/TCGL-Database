@@ -11,7 +11,7 @@ place so they can be added without touching the archive.
 | Knowing which player is you | The required `username` column |
 | Re-running detection over old games | `scripts/backfill.py`, plus full raw logs |
 | Programmatic read access | `GET /api/games`, with `?include_log=true` |
-| Somewhere to put new fields | `ALTER TABLE` plus backfill, see [schema.md](schema.md) |
+| Somewhere to put new fields | `_ADDED_COLUMNS` in `app/db.py` plus backfill, see [schema.md](schema.md) |
 
 Nothing being stored today has to change for either feature.
 

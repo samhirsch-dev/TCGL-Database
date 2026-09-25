@@ -14,6 +14,37 @@ SELECT COUNT(*) AS games,
 FROM games;
 ```
 
+## Ranked vs casual
+
+```sql
+SELECT COALESCE(game_mode, '(not recorded)') AS mode,
+       COUNT(*) AS games,
+       SUM(result = 'W') AS wins,
+       ROUND(100.0 * SUM(result = 'W') / COUNT(*), 1) AS win_pct
+FROM games
+GROUP BY mode
+ORDER BY games DESC;
+```
+
+Add `WHERE game_mode = 'ranked'` to any other query here to count only ranked
+games.
+
+## Rank points over time
+
+`rank_points` is what you had going *into* a game, so a game's effect is the
+next ranked game's points minus its own:
+
+```sql
+SELECT date, id, result, rank_points,
+       LEAD(rank_points) OVER (ORDER BY date, id) - rank_points AS change
+FROM games
+WHERE game_mode = 'ranked' AND rank_points IS NOT NULL
+ORDER BY date DESC, id DESC;
+```
+
+The newest game shows no change yet. If you played a ranked game without
+logging it, the change on the game before the gap covers both games.
+
 ## Win rate by matchup, variant included
 
 ```sql

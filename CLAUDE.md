@@ -9,7 +9,7 @@ Cloudflare Tunnel behind Cloudflare Access.
 
 ```bash
 pip install -r requirements.txt pytest httpx
-python -m pytest -q                                   # 25 tests, all must pass
+python -m pytest -q                                   # 36 tests, all must pass
 TCG_DB_PATH=./data/games.db uvicorn app.main:app --reload --port 8000
 python -m scripts.backfill                            # dry run
 python -m scripts.backfill --apply                    # re-derive fields from raw logs
@@ -19,7 +19,8 @@ docker compose up -d --build                          # deploy
 ## Layout
 
 - `app/parser.py` — log parsing. Imports nothing else from the app; keep it that way.
-- `app/db.py` — schema, `init_db()` (idempotent, runs every start), queries.
+- `app/db.py` — schema, `init_db()` (idempotent, runs every start, adds any
+  missing `_ADDED_COLUMNS` to existing databases), queries.
 - `app/main.py` — FastAPI routes, form handling, CSV/JSON export.
 - `app/templates/` — Jinja2. Styles are inline in `base.html`; no static files, no JS build.
 - `scripts/backfill.py` — recompute derived columns across the archive.
@@ -36,8 +37,9 @@ docker compose up -d --build                          # deploy
 2. **Don't store what you can derive, unless it's filtered on constantly.**
    `turns` is the only stored derived field. `went_first`, mulligans, prizes
    and knockouts are parsed on demand and shown on the detail page. New
-   derived columns go in via `ALTER TABLE` + `scripts/backfill.py` (see
-   `docs/schema.md`), with `SCHEMA_VERSION` bumped in `app/db.py`.
+   columns go in `_ADDED_COLUMNS` in `app/db.py` (never the `CREATE TABLE`),
+   plus `scripts/backfill.py` if derived; bump `SCHEMA_VERSION` and the table
+   in `docs/schema.md`.
 3. **`username` is required** — it is the only way to tell which side of a log
    is the user. Reject logs where it doesn't appear.
 4. **Duplicates are impossible, not unlikely.** `log_hash` is UNIQUE and taken
@@ -46,6 +48,10 @@ docker compose up -d --build                          # deploy
 6. **Deck and variant are free text.** No lookup tables; archetype names shift
    every rotation. Variant splits one archetype into builds
    (e.g. `Dragapult ex` / `Dusknoir` vs `Dudunsparce`).
+7. **Ranked info is hand-entered; the log doesn't contain it.** `game_mode` is
+   `ranked`/`casual`/NULL; `rank_points` is points *before* the game. Points
+   imply ranked; points on a casual game are rejected. Validation lives in
+   `_mode_and_points()` in `app/main.py`.
 
 ## Parser gotchas
 

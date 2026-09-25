@@ -296,3 +296,121 @@ def test_delete_removes_the_game(client):
     from app import db
 
     assert db.get_game(1) is None
+
+
+# --- ranked games -----------------------------------------------------------
+
+def test_existing_database_gains_the_ranked_columns(tmp_path, monkeypatch):
+    """A database created before these columns existed is upgraded in place."""
+    import sqlite3
+
+    from app import db
+
+    path = tmp_path / "v1.db"
+    conn = sqlite3.connect(path)
+    conn.executescript(
+        "CREATE TABLE games (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, "
+        "username TEXT NOT NULL, players_deck TEXT, players_variant TEXT, "
+        "opponents_deck TEXT, opponents_variant TEXT, result TEXT, turns INTEGER, "
+        "log_hash TEXT NOT NULL UNIQUE, raw_log TEXT NOT NULL, "
+        "created_at TEXT NOT NULL DEFAULT (datetime('now')));"
+        "INSERT INTO games (date, username, result, turns, log_hash, raw_log) "
+        "VALUES ('2026-09-20', 'super-victini13', 'W', 13, 'abc', 'the log');"
+    )
+    conn.commit()
+    conn.close()
+
+    monkeypatch.setattr(db, "DB_PATH", path)
+    db.init_db()
+    db.init_db()  # restarts must be safe
+
+    row = db.get_game(1)
+    assert row["result"] == "W" and row["raw_log"] == "the log"
+    assert row["game_mode"] is None and row["rank_points"] is None
+
+
+def _post(client, **fields):
+    data = {"raw_log": SAMPLE, "username": USERNAME, **fields}
+    return client.post("/games", data=data, follow_redirects=False)
+
+
+def test_ranked_game_stores_mode_and_points(client):
+    _post(client, game_mode="ranked", rank_points="1250")
+    from app import db
+
+    row = db.list_games()[0]
+    assert row["game_mode"] == "ranked" and row["rank_points"] == 1250
+
+
+def test_points_without_a_mode_mark_the_game_ranked(client):
+    _post(client, rank_points="0")
+    from app import db
+
+    row = db.list_games()[0]
+    assert row["game_mode"] == "ranked" and row["rank_points"] == 0
+
+
+def test_mode_and_points_default_to_not_recorded(client):
+    _post(client)
+    from app import db
+
+    row = db.list_games()[0]
+    assert row["game_mode"] is None and row["rank_points"] is None
+
+
+def test_casual_game_with_points_is_rejected(client):
+    r = _post(client, game_mode="casual", rank_points="300")
+    assert "only+apply+to+ranked" in r.headers["location"]
+    from app import db
+
+    assert db.list_games() == []
+
+
+@pytest.mark.parametrize("points", ["-5", "12.5", "lots"])
+def test_invalid_rank_points_are_rejected(client, points):
+    r = _post(client, game_mode="ranked", rank_points=points)
+    assert "whole+number" in r.headers["location"]
+
+
+def test_edit_sets_and_clears_ranked_fields(client):
+    _post(client)
+    client.post(
+        "/games/1/edit",
+        data={"date": "2026-09-20", "game_mode": "ranked", "rank_points": "900"},
+        follow_redirects=False,
+    )
+    from app import db
+
+    row = db.get_game(1)
+    assert row["game_mode"] == "ranked" and row["rank_points"] == 900
+
+    client.post(
+        "/games/1/edit",
+        data={"date": "2026-09-20", "game_mode": "casual", "rank_points": ""},
+        follow_redirects=False,
+    )
+    row = db.get_game(1)
+    assert row["game_mode"] == "casual" and row["rank_points"] is None
+
+
+def test_invalid_edit_shows_an_error_and_changes_nothing(client):
+    _post(client, game_mode="ranked", rank_points="900")
+    r = client.post(
+        "/games/1/edit",
+        data={"date": "2026-09-20", "game_mode": "casual", "rank_points": "500"},
+        follow_redirects=False,
+    )
+    assert r.headers["location"].startswith("/games/1?error=")
+    assert "only apply to ranked games" in client.get(r.headers["location"]).text
+    from app import db
+
+    row = db.get_game(1)
+    assert row["game_mode"] == "ranked" and row["rank_points"] == 900
+
+
+def test_ranked_fields_appear_in_list_and_exports(client):
+    _post(client, game_mode="ranked", rank_points="1250")
+    assert "1,250" in client.get("/").text
+    csv_body = client.get("/export.csv").text
+    assert "game_mode,rank_points" in csv_body and "ranked,1250" in csv_body
+    assert client.get("/api/games").json()["games"][0]["rank_points"] == 1250

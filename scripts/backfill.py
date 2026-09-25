@@ -8,9 +8,9 @@ Usage:
     python -m scripts.backfill              # report what would change
     python -m scripts.backfill --apply      # write the changes
 
-Adding a new derived column, end to end:
-    1. ALTER TABLE games ADD COLUMN went_first INTEGER;   (see docs/schema.md)
-    2. Extend UPDATES below with the new field.
+Adding a new derived column, end to end (see docs/schema.md):
+    1. Add it to _ADDED_COLUMNS in app/db.py; the next start creates it.
+    2. Extend derive() below with the new field.
     3. python -m scripts.backfill --apply
 """
 

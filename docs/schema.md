@@ -20,6 +20,11 @@ and a backup is a file copy.
 | `log_hash` | TEXT UNIQUE | no | computed | SHA-256 of the normalised log |
 | `raw_log` | TEXT | no | form | Stored exactly as pasted |
 | `created_at` | TEXT | no | auto | When the row was written, UTC |
+| `game_mode` | TEXT | yes | form | `ranked`, `casual`, or NULL (not recorded), enforced by a CHECK constraint. Added in v2 |
+| `rank_points` | INTEGER | yes | form | Ranked points going *into* the game, 0 or more. Ranked games only. Added in v2 |
+
+Columns added after v1 sit after `created_at` because SQLite can only append
+columns to an existing table.
 
 Indexes: `date`, `result`, `(players_deck, players_variant)`, and
 `(opponents_deck, opponents_variant)`.
@@ -42,6 +47,21 @@ re-imports and database rebuilds.
 worth denormalising: it is used for sorting and filtering, and recomputing it
 would mean parsing every log on every list view.
 
+**`game_mode` and `rank_points` are typed by hand.** The log never says whether
+a game was ranked, so neither can be derived. They are two columns rather than
+one because "no points recorded" and "not ranked" are different facts: a ranked
+game where you skipped the points is still ranked. The app enforces the rules
+between them:
+
+- Points with the mode left blank save as `ranked`, since only ranked play has
+  points.
+- Points on a `casual` game are rejected.
+- `ranked` with no points is allowed.
+
+`rank_points` is the value *before* the game, so the change a game caused is
+the next ranked game's points minus this one's (see
+[queries.md](queries.md)).
+
 **`went_first` is intentionally absent.** It is derivable from the log, it is
 not needed to render the list view, and the parser already exposes it on the
 game detail page. If you later decide you want to filter on it, see the next
@@ -52,22 +72,35 @@ section.
 Nothing is lost by deciding later. The raw log is intact, so any field you
 think of can be backfilled across the whole archive.
 
-```bash
-# 1. Add the column
-sqlite3 /mnt/nas/tcg-log-vault/games.db \
-  "ALTER TABLE games ADD COLUMN went_first INTEGER;"
+1. Add the column to `_ADDED_COLUMNS` in `app/db.py` and bump
+   `SCHEMA_VERSION`:
 
-# 2. Teach the parser to produce it (app/parser.py already computes
-#    first_player), then extend derive() in scripts/backfill.py:
-#      "went_first": 1 if parsed.first_player == row["username"] else 0
+   ```python
+   "went_first": "INTEGER CHECK (went_first IN (0, 1) OR went_first IS NULL)",
+   ```
 
-# 3. Preview, then apply
-python -m scripts.backfill
-python -m scripts.backfill --apply
-```
+   `init_db()` adds any listed column a database lacks, on every start. Existing
+   databases are upgraded by the next restart; no manual `ALTER TABLE` is
+   needed. Don't edit the `CREATE TABLE` in `_SCHEMA`. That would give fresh
+   installs the column twice, once from `_SCHEMA` and once from the loop.
 
-At a few hundred games this takes well under a second. Bump `SCHEMA_VERSION`
-in `app/db.py` and add the `ALTER TABLE` to `_SCHEMA` so fresh installs match.
+2. If the value comes from the log, teach the parser to produce it
+   (`app/parser.py` already computes `first_player`), then extend `derive()` in
+   `scripts/backfill.py`:
+
+   ```python
+   "went_first": 1 if parsed.first_player == row["username"] else 0,
+   ```
+
+3. Deploy, then preview and apply the backfill:
+
+   ```bash
+   python -m scripts.backfill
+   python -m scripts.backfill --apply
+   ```
+
+At a few hundred games this takes well under a second. Fields typed into the
+form, like `game_mode`, skip steps 2 and 3; old rows stay NULL ("not recorded").
 
 Good candidates already available from the parser: `went_first`,
 `mulligans`, `prizes_taken`, `prizes_conceded`, `win_condition`,
@@ -87,6 +120,14 @@ Good candidates already available from the parser: `went_first`,
 
 ## Migrations
 
-`schema_meta` holds a `schema_version` row. Current version: **1**. Migrations
-are plain `ALTER TABLE` statements plus a backfill, as above. `init_db()` runs
-on every start and is idempotent, so restarting the container is always safe.
+`schema_meta` holds a `schema_version` row. Current version: **2**.
+
+| Version | Change |
+|---|---|
+| 1 | Initial `games` table |
+| 2 | Added `game_mode` and `rank_points` |
+
+Migrations only ever add columns, via `_ADDED_COLUMNS` as above. `init_db()`
+runs on every start and is idempotent, so restarting the container is always
+safe. Take a backup before deploying a version that adds columns anyway: the
+upgrade writes to the live database.
