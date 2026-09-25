@@ -68,7 +68,10 @@ docker compose up -d --build                          # deploy
 - SQLite must be on a **local** filesystem (the RAID 1 array is bind-mounted
   at `/data`). Never put the DB on SMB/NFS.
 - WAL mode is on. Backups use `sqlite3 ... ".backup"`, not `cp`.
-- Port binds to `127.0.0.1:8088` only; external access is via the tunnel.
+- Port 8088 is published on all interfaces for LAN access (the user's choice);
+  access from outside the LAN is only via the tunnel. Docker bypasses `ufw`.
+- `TZ` in `docker-compose.yml` sets the form's default date; the image installs
+  `tzdata` because without it `TZ` is silently ignored. `created_at` stays UTC.
 - The app has **no authentication**. Don't add routes that assume otherwise,
   and don't suggest exposing it without Cloudflare Access.
 

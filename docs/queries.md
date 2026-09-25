@@ -1,7 +1,7 @@
 # Query cookbook
 
 ```bash
-sqlite3 -header -column /mnt/raid/tcg-log-vault/games.db
+sqlite3 -header -column /mnt/nas/tcg-log-vault/games.db
 ```
 
 ## Overall record

@@ -6,10 +6,14 @@ services:
     restart: unless-stopped
     environment:
       TCG_DB_PATH: /data/games.db
+      # Decides what "today" is for the date field. Without it the container
+      # uses UTC, which is already tomorrow on US evenings.
+      TZ: America/Chicago
     volumes:
       # Left side: a directory on the RAID 1 array. Change it to your mount.
-      - /mnt/raid/tcg-log-vault:/data
+      - /mnt/nas/tcg-log-vault:/data
     ports:
-      # Bound to localhost only: Cloudflare Tunnel reaches it from the host.
-      # Use "8088:8000" instead if you want it on the LAN directly.
-      - "127.0.0.1:8088:8000"
+      # Reachable from the LAN at http://<server-ip>:8088. The app has no login,
+      # so never forward this port on the router; use Cloudflare Tunnel + Access
+      # for outside access. Use "127.0.0.1:8088:8000" for host-only access.
+      - "8088:8000"

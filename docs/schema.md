@@ -54,7 +54,7 @@ think of can be backfilled across the whole archive.
 
 ```bash
 # 1. Add the column
-sqlite3 /mnt/raid/tcg-log-vault/games.db \
+sqlite3 /mnt/nas/tcg-log-vault/games.db \
   "ALTER TABLE games ADD COLUMN went_first INTEGER;"
 
 # 2. Teach the parser to produce it (app/parser.py already computes

@@ -48,7 +48,7 @@ save today limits what you can extract from the archive later.
 
 ```bash
 # 1. Choose where the database lives (a directory on your RAID array)
-sudo mkdir -p /mnt/raid/tcg-log-vault
+sudo mkdir -p /mnt/nas/tcg-log-vault
 
 # 2. Point docker-compose.yml at that path if it differs, then:
 docker compose up -d --build
@@ -57,10 +57,11 @@ docker compose up -d --build
 curl http://127.0.0.1:8088/healthz     # -> ok
 ```
 
-By default the port is published on `127.0.0.1:8088` only, so nothing is
-exposed to the LAN until you decide it should be. Change the `ports` line in
-`docker-compose.yml` to `"8088:8000"` for LAN access, or leave it as is and
-route to it with Cloudflare Tunnel.
+The port is published on 8088 on every interface, so it is reachable from the
+LAN at `http://<server-ip>:8088`. The app has no login: anyone on the LAN can
+read and delete games. Never forward the port on your router; use Cloudflare
+Tunnel with Access for outside access. Change the `ports` line in
+`docker-compose.yml` to `"127.0.0.1:8088:8000"` for host-only access.
 
 ## Running it without Docker
 
@@ -75,6 +76,7 @@ TCG_DB_PATH=./data/games.db uvicorn app.main:app --reload --port 8000
 | Variable | Default | Purpose |
 |---|---|---|
 | `TCG_DB_PATH` | `/data/games.db` | Full path to the SQLite file. Its directory is created on startup. |
+| `TZ` | `America/Chicago` in `docker-compose.yml` | Your timezone, which decides the form's default date. Unset means UTC. |
 
 That is the entire configuration surface. There is intentionally nothing else
 to set.
@@ -116,7 +118,7 @@ trustworthy. Deleting a game removes it permanently.
 | `/api/games` | JSON, with `?include_log=true` to embed raw logs |
 | `/games/{id}/raw` | One log as plain text |
 
-The database itself is a single file. `sqlite3 /mnt/raid/tcg-log-vault/games.db`
+The database itself is a single file. `sqlite3 /mnt/nas/tcg-log-vault/games.db`
 gives you everything, and [docs/queries.md](docs/queries.md) has queries to
 start from.
 
@@ -167,7 +169,7 @@ corruption, or a bad `DELETE`. Add a real backup:
 
 ```bash
 # Consistent snapshot even while the app is running
-sqlite3 /mnt/raid/tcg-log-vault/games.db ".backup '/mnt/raid/backups/games-$(date +%F).db'"
+sqlite3 /mnt/nas/tcg-log-vault/games.db ".backup '/mnt/nas/backups/games-$(date +%F).db'"
 ```
 
 Details, including a cron entry and an offsite option, are in

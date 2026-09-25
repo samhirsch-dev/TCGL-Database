@@ -9,13 +9,13 @@ Access.
 SQLite must sit on a **local filesystem**. Its locking is unreliable over SMB
 and NFS, and a corrupted database is the likely outcome of ignoring this. A
 bind mount to a locally-mounted RAID array is local as far as SQLite is
-concerned, so `/mnt/raid/...` is fine. A share mounted from another machine is
+concerned, so `/mnt/nas/...` is fine. A share mounted from another machine is
 not.
 
 ## Install
 
 ```bash
-sudo mkdir -p /mnt/raid/tcg-log-vault
+sudo mkdir -p /mnt/nas/tcg-log-vault
 git clone <your repo> /opt/tcg-log-vault   # or copy the folder there
 cd /opt/tcg-log-vault
 ```
@@ -25,7 +25,7 @@ elsewhere:
 
 ```yaml
 volumes:
-  - /mnt/raid/tcg-log-vault:/data
+  - /mnt/nas/tcg-log-vault:/data
 ```
 
 Then:
@@ -37,9 +37,16 @@ curl http://127.0.0.1:8088/healthz
 ```
 
 The image runs `uvicorn` on port 8000 inside the container. The compose file
-publishes it on `127.0.0.1:8088`, so it is reachable from the host only. The
-container has a `HEALTHCHECK`, so `docker ps` reports health, and Portainer
-shows it too.
+publishes it on port 8088 on every interface, so it is reachable from the LAN
+at `http://<server-ip>:8088`. Anyone on the LAN can read and delete games, and
+Docker's published ports bypass `ufw`, so a firewall rule will not restrict it.
+Never forward 8088 on the router. For host-only access, change the `ports` line
+to `"127.0.0.1:8088:8000"`; Cloudflare Tunnel works either way. The container
+has a `HEALTHCHECK`, so `docker ps` reports health, and Portainer shows it too.
+
+The `TZ` variable in `docker-compose.yml` sets what "today" means for the
+form's default date. Without it the container runs on UTC, which is already the
+next day on US evenings. `created_at` is always stored in UTC regardless.
 
 ## Remote access with Cloudflare Tunnel
 
@@ -76,8 +83,8 @@ games.
 
 Two further hardening options, only if you want them:
 
-- Keep the port bound to `127.0.0.1` (the default here) so the only route in is
-  the tunnel.
+- Bind the port to `127.0.0.1` so the only route in is the tunnel (at the cost
+  of LAN access by IP).
 - Add a Cloudflare WAF rate-limiting rule on `POST /games` if you ever open it
   more widely.
 
@@ -87,7 +94,7 @@ RAID 1 survives a dead disk. It does not survive an accidental delete, a bad
 migration, or file corruption. A daily copy takes a second.
 
 ```bash
-sudo mkdir -p /mnt/raid/backups/tcg-log-vault
+sudo mkdir -p /mnt/nas/backups/tcg-log-vault
 ```
 
 `/etc/cron.daily/tcg-log-vault-backup`, or a crontab entry:
@@ -95,8 +102,8 @@ sudo mkdir -p /mnt/raid/backups/tcg-log-vault
 ```bash
 #!/bin/sh
 set -eu
-DB=/mnt/raid/tcg-log-vault/games.db
-OUT=/mnt/raid/backups/tcg-log-vault
+DB=/mnt/nas/tcg-log-vault/games.db
+OUT=/mnt/nas/backups/tcg-log-vault
 sqlite3 "$DB" ".backup '$OUT/games-$(date +%F).db'"
 gzip -f "$OUT/games-$(date +%F).db"
 find "$OUT" -name 'games-*.db.gz' -mtime +30 -delete
@@ -115,8 +122,8 @@ useful human-readable secondary copy.
 
 ```bash
 docker compose stop
-gunzip -c /mnt/raid/backups/tcg-log-vault/games-2026-09-20.db.gz \
-  > /mnt/raid/tcg-log-vault/games.db
+gunzip -c /mnt/nas/backups/tcg-log-vault/games-2026-09-20.db.gz \
+  > /mnt/nas/tcg-log-vault/games.db
 docker compose start
 ```
 
