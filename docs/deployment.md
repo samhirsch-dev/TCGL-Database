@@ -12,29 +12,36 @@ bind mount to a locally-mounted RAID array is local as far as SQLite is
 concerned, so `/mnt/nas/...` is fine. A share mounted from another machine is
 not.
 
+## The server
+
+| | |
+|---|---|
+| Host | `linux-server`, `192.168.0.103` on the LAN (DHCP; check with `hostname -I` if it stops answering) |
+| App folder | `/opt/tcg-log-vault`, owned by `sam` |
+| Database | `/mnt/nas/tcg-log-vault/games.db` (RAID 1, `md0`), owned by root because the container writes it |
+| Backups | `/home/sam/backups/tcg-log-vault` (NVMe, so a failed array doesn't take them too) |
+| Timezone | `America/Chicago`, set on the host; the container follows it |
+
+`sam` is in the `docker` group, so managing the container needs no `sudo`.
+Membership is effectively root on this machine, which also runs Immich,
+Portainer, and the Cloudflare tunnel.
+
 ## Install
 
-```bash
-sudo mkdir -p /mnt/nas/tcg-log-vault
-git clone <your repo> /opt/tcg-log-vault   # or copy the folder there
-cd /opt/tcg-log-vault
-```
+The GitHub repo is private and the server has no credentials for it, so code
+reaches the server as an archive built on the PC, never by `git clone`.
 
-Edit the volume line in `docker-compose.yml` if your array is mounted
-elsewhere:
-
-```yaml
-volumes:
-  - /mnt/nas/tcg-log-vault:/data
-```
-
-Then:
+On the server, once:
 
 ```bash
-docker compose up -d --build
-docker compose logs -f          # watch the first start
-curl http://127.0.0.1:8088/healthz
+sudo mkdir -p /mnt/nas/tcg-log-vault /opt/tcg-log-vault
+sudo chown sam: /opt/tcg-log-vault
+sudo usermod -aG docker sam          # log out and back in afterwards
+sudo timedatectl set-timezone America/Chicago
 ```
+
+Then deploy as in [Updating](#updating). Edit the volume line in
+`docker-compose.yml` first if your array is mounted elsewhere.
 
 The image runs `uvicorn` on port 8000 inside the container. The compose file
 publishes it on port 8088 on every interface, so it is reachable from the LAN
@@ -44,9 +51,12 @@ Never forward 8088 on the router. For host-only access, change the `ports` line
 to `"127.0.0.1:8088:8000"`; Cloudflare Tunnel works either way. The container
 has a `HEALTHCHECK`, so `docker ps` reports health, and Portainer shows it too.
 
-The `TZ` variable in `docker-compose.yml` sets what "today" means for the
-form's default date. Without it the container runs on UTC, which is already the
-next day on US evenings. `created_at` is always stored in UTC regardless.
+The form's default date is "today" in the container's timezone. A container
+ignores the host's timezone unless it is shared, so `docker-compose.yml` mounts
+the host's `/etc/localtime` read-only. Set the timezone on the host with
+`timedatectl`, then restart the container: the mount keeps the old zone until
+then. Left on UTC, the form defaults to tomorrow on US evenings. `created_at` is
+always stored in UTC regardless.
 
 ## Remote access with Cloudflare Tunnel
 
@@ -91,27 +101,25 @@ Two further hardening options, only if you want them:
 ## Backups
 
 RAID 1 survives a dead disk. It does not survive an accidental delete, a bad
-migration, or file corruption. A daily copy takes a second.
+migration, or file corruption.
+
+[`scripts/backup.sh`](../scripts/backup.sh) takes a snapshot with SQLite's
+backup API inside the container, runs an integrity check on it, copies it out to
+`~/backups/tcg-log-vault/games-YYYY-MM-DD-HHMM.db.gz`, and deletes copies older
+than 30 days. It needs no `sudo`. Never back up with `cp`: it can catch the file
+mid-write, and in WAL mode recent changes may still be in `games.db-wal`.
+
+Run it by hand before any deploy that changes the schema:
 
 ```bash
-sudo mkdir -p /mnt/nas/backups/tcg-log-vault
+sh /opt/tcg-log-vault/scripts/backup.sh
 ```
 
-`/etc/cron.daily/tcg-log-vault-backup`, or a crontab entry:
+To run it daily at 3:30 AM, add this with `crontab -e`:
 
-```bash
-#!/bin/sh
-set -eu
-DB=/mnt/nas/tcg-log-vault/games.db
-OUT=/mnt/nas/backups/tcg-log-vault
-sqlite3 "$DB" ".backup '$OUT/games-$(date +%F).db'"
-gzip -f "$OUT/games-$(date +%F).db"
-find "$OUT" -name 'games-*.db.gz' -mtime +30 -delete
 ```
-
-Use `.backup` rather than `cp`. It takes a consistent snapshot while the app is
-running; a plain copy can catch the file mid-write, especially with WAL mode
-on.
+30 3 * * * /bin/sh /opt/tcg-log-vault/scripts/backup.sh >> $HOME/backups/tcg-log-vault/backup.log 2>&1
+```
 
 Send a copy offsite as well, using whatever you already run (rclone to a cloud
 bucket, a sync to another machine, or a periodic download of `/export.csv`).
@@ -120,24 +128,35 @@ useful human-readable secondary copy.
 
 ### Restoring
 
+The database is root-owned, so restoring needs `sudo`:
+
 ```bash
-docker compose stop
-gunzip -c /mnt/nas/backups/tcg-log-vault/games-2026-09-20.db.gz \
-  > /mnt/nas/tcg-log-vault/games.db
+cd /opt/tcg-log-vault && docker compose stop
+gunzip -c ~/backups/tcg-log-vault/games-2026-09-24-2130.db.gz | sudo tee /mnt/nas/tcg-log-vault/games.db > /dev/null
+sudo rm -f /mnt/nas/tcg-log-vault/games.db-wal /mnt/nas/tcg-log-vault/games.db-shm
 docker compose start
 ```
 
+Delete the `-wal` and `-shm` files. A leftover WAL file belongs to the old
+database, and SQLite would replay it onto the restored one.
+
 ## Updating
 
+The server must always run a commit that is on GitHub, so the repo and the
+server never drift apart. Never edit files in `/opt/tcg-log-vault` directly.
+Change them in the repo, push, then deploy. From the repo on the PC:
+
 ```bash
-cd /opt/tcg-log-vault
-git pull
-docker compose up -d --build
+git push origin main
+git archive --format=tar.gz -o tcg-log-vault.tar.gz origin/main
+scp tcg-log-vault.tar.gz sam@192.168.0.103:~/
+ssh sam@192.168.0.103 "tar -xzf ~/tcg-log-vault.tar.gz -C /opt/tcg-log-vault && cd /opt/tcg-log-vault && docker compose up -d --build"
 ```
 
-Take a backup first if the update includes a schema change. `init_db()` is
-idempotent, so restarts and rebuilds never lose data, and the database is
-outside the image.
+Archiving `origin/main` rather than `main` guarantees that what's deployed is
+what GitHub has. Run `scripts/backup.sh` first if the update adds columns. The
+database is outside the image, and `init_db()` is idempotent, so rebuilds never
+lose data.
 
 ## Troubleshooting
 
@@ -147,6 +166,7 @@ outside the image.
 | `database is locked` | Two writers, or the file is on a network share | Confirm the mount is local; only one container should use it |
 | Page loads but saving fails silently | Reverse proxy dropping the POST body size | Raise the body limit; logs run tens of KB |
 | Health check failing | App failed to start | `docker compose logs tcg-log-vault` |
+| Form defaults to tomorrow's date | Host on UTC, or timezone changed without a restart | `timedatectl`, then `docker compose restart` |
 
 ## If you later prefer Postgres
 

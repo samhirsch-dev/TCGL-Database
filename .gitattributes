@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Shell scripts run on the Linux server; CRLF would break them.
+*.sh text eol=lf

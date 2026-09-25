@@ -57,6 +57,9 @@ docker compose up -d --build
 curl http://127.0.0.1:8088/healthz     # -> ok
 ```
 
+For the real server, including how code gets there (the repo is private, so
+it's copied over as an archive), follow [docs/deployment.md](docs/deployment.md).
+
 The port is published on 8088 on every interface, so it is reachable from the
 LAN at `http://<server-ip>:8088`. The app has no login: anyone on the LAN can
 read and delete games. Never forward the port on your router; use Cloudflare
@@ -76,10 +79,10 @@ TCG_DB_PATH=./data/games.db uvicorn app.main:app --reload --port 8000
 | Variable | Default | Purpose |
 |---|---|---|
 | `TCG_DB_PATH` | `/data/games.db` | Full path to the SQLite file. Its directory is created on startup. |
-| `TZ` | `America/Chicago` in `docker-compose.yml` | Your timezone, which decides the form's default date. Unset means UTC. |
-
 That is the entire configuration surface. There is intentionally nothing else
-to set.
+to set. The form's default date follows the server's timezone, which
+`docker-compose.yml` shares into the container; set it on the host with
+`sudo timedatectl set-timezone America/Chicago`.
 
 ---
 
@@ -167,12 +170,13 @@ first, and mulliganing 3 times.
 ## Backups
 
 RAID 1 protects against a failed disk. It does not protect against deletion,
-corruption, or a bad `DELETE`. Add a real backup:
+corruption, or a bad `DELETE`. On the server, `scripts/backup.sh` takes a
+consistent snapshot while the app runs and saves it to
+`~/backups/tcg-log-vault`:
 
 ```bash
-# Consistent snapshot even while the app is running
-sqlite3 /mnt/nas/tcg-log-vault/games.db ".backup '/mnt/nas/backups/games-$(date +%F).db'"
+sh /opt/tcg-log-vault/scripts/backup.sh
 ```
 
-Details, including a cron entry and an offsite option, are in
+The daily cron entry, restoring, and deploying are covered in
 [docs/deployment.md](docs/deployment.md).

@@ -13,8 +13,13 @@ python -m pytest -q                                   # 35 tests, all must pass
 TCG_DB_PATH=./data/games.db uvicorn app.main:app --reload --port 8000
 python -m scripts.backfill                            # dry run
 python -m scripts.backfill --apply                    # re-derive fields from raw logs
-docker compose up -d --build                          # deploy
 ```
+
+Deploying is in `docs/deployment.md` → Updating: push, then `git archive
+origin/main`, then scp/extract/rebuild over SSH to `sam@192.168.0.103`. Key auth
+from this PC works, with no password. **The server must only ever run a commit
+that is on GitHub.** Never edit files on the server directly, and run
+`scripts/backup.sh` there before any deploy that adds columns.
 
 ## Layout
 
@@ -24,6 +29,8 @@ docker compose up -d --build                          # deploy
 - `app/main.py` — FastAPI routes, form handling, CSV/JSON export.
 - `app/templates/` — Jinja2. Styles are inline in `base.html`; no static files, no JS build.
 - `scripts/backfill.py` — recompute derived columns across the archive.
+- `scripts/backup.sh` — snapshot the live DB on the server via `docker exec`
+  (no sudo) into `~/backups/tcg-log-vault` on the NVMe.
 - `tests/sample_log.txt` — a real log; tests assert known values (13 turns,
   super-victini13 wins 6–0 on knockouts, went first, 3 mulligans).
 - `docs/` — schema, log format, deployment, queries, roadmap. Update the
@@ -73,11 +80,13 @@ docker compose up -d --build                          # deploy
 
 - SQLite must be on a **local** filesystem (the RAID 1 array is bind-mounted
   at `/data`). Never put the DB on SMB/NFS.
-- WAL mode is on. Backups use `sqlite3 ... ".backup"`, not `cp`.
+- WAL mode is on. Backups use SQLite's backup API (`scripts/backup.sh`), never `cp`.
 - Port 8088 is published on all interfaces for LAN access (the user's choice);
   access from outside the LAN is only via the tunnel. Docker bypasses `ufw`.
-- `TZ` in `docker-compose.yml` sets the form's default date; the image installs
-  `tzdata` because without it `TZ` is silently ignored. `created_at` stays UTC.
+- The container follows the host's timezone (`/etc/localtime` mounted
+  read-only), which sets the form's default date. The host is set to
+  `America/Chicago`. After changing it, restart the container. `created_at`
+  stays UTC.
 - The app has **no authentication**. Don't add routes that assume otherwise,
   and don't suggest exposing it without Cloudflare Access.
 
