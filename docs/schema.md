@@ -20,11 +20,10 @@ and a backup is a file copy.
 | `log_hash` | TEXT UNIQUE | no | computed | SHA-256 of the normalised log |
 | `raw_log` | TEXT | no | form | Stored exactly as pasted |
 | `created_at` | TEXT | no | auto | When the row was written, UTC |
-| `game_mode` | TEXT | yes | form | `ranked`, `casual`, or NULL (not recorded), enforced by a CHECK constraint. Added in v2 |
-| `rank_points` | INTEGER | yes | form | Ranked points going *into* the game, 0 or more. Ranked games only. Added in v2 |
+| `rank_points` | INTEGER | yes | form | Ranked points going *into* the game, 0 or more. NULL means not ranked. Added in v2 |
 
-Columns added after v1 sit after `created_at` because SQLite can only append
-columns to an existing table.
+`rank_points` sits after `created_at` because SQLite can only append columns to
+an existing table.
 
 Indexes: `date`, `result`, `(players_deck, players_variant)`, and
 `(opponents_deck, opponents_variant)`.
@@ -47,16 +46,12 @@ re-imports and database rebuilds.
 worth denormalising: it is used for sorting and filtering, and recomputing it
 would mean parsing every log on every list view.
 
-**`game_mode` and `rank_points` are typed by hand.** The log never says whether
-a game was ranked, so neither can be derived. They are two columns rather than
-one because "no points recorded" and "not ranked" are different facts: a ranked
-game where you skipped the points is still ranked. The app enforces the rules
-between them:
-
-- Points with the mode left blank save as `ranked`, since only ranked play has
-  points.
-- Points on a `casual` game are rejected.
-- `ranked` with no points is allowed.
+**`rank_points` is typed by hand, and it doubles as the ranked flag.** The log
+never says whether a game was ranked, so this can't be derived. A game with
+points is ranked; NULL means not ranked. There's deliberately no separate
+ranked/casual column. The consequence is that a ranked game saved without its
+points counts as casual. To fix that, add the points from the game's edit
+form.
 
 `rank_points` is the value *before* the game, so the change a game caused is
 the next ranked game's points minus this one's (see
@@ -100,7 +95,7 @@ think of can be backfilled across the whole archive.
    ```
 
 At a few hundred games this takes well under a second. Fields typed into the
-form, like `game_mode`, skip steps 2 and 3; old rows stay NULL ("not recorded").
+form, like `rank_points`, skip steps 2 and 3; old rows stay NULL.
 
 Good candidates already available from the parser: `went_first`,
 `mulligans`, `prizes_taken`, `prizes_conceded`, `win_condition`,
@@ -125,7 +120,7 @@ Good candidates already available from the parser: `went_first`,
 | Version | Change |
 |---|---|
 | 1 | Initial `games` table |
-| 2 | Added `game_mode` and `rank_points` |
+| 2 | Added `rank_points` |
 
 Migrations only ever add columns, via `_ADDED_COLUMNS` as above. `init_db()`
 runs on every start and is idempotent, so restarting the container is always

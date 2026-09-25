@@ -9,7 +9,7 @@ Cloudflare Tunnel behind Cloudflare Access.
 
 ```bash
 pip install -r requirements.txt pytest httpx
-python -m pytest -q                                   # 36 tests, all must pass
+python -m pytest -q                                   # 35 tests, all must pass
 TCG_DB_PATH=./data/games.db uvicorn app.main:app --reload --port 8000
 python -m scripts.backfill                            # dry run
 python -m scripts.backfill --apply                    # re-derive fields from raw logs
@@ -48,10 +48,10 @@ docker compose up -d --build                          # deploy
 6. **Deck and variant are free text.** No lookup tables; archetype names shift
    every rotation. Variant splits one archetype into builds
    (e.g. `Dragapult ex` / `Dusknoir` vs `Dudunsparce`).
-7. **Ranked info is hand-entered; the log doesn't contain it.** `game_mode` is
-   `ranked`/`casual`/NULL; `rank_points` is points *before* the game. Points
-   imply ranked; points on a casual game are rejected. Validation lives in
-   `_mode_and_points()` in `app/main.py`.
+7. **`rank_points` is the only ranked data, and it's hand-entered** (the log
+   doesn't say whether a game was ranked). It's the points *before* the game;
+   NULL means not ranked. The user chose one column over a separate
+   ranked/casual column, so don't add one back unasked.
 
 ## Parser gotchas
 

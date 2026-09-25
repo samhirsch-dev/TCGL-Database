@@ -98,10 +98,8 @@ to set.
    - **Your deck / variant** and **Opponent's deck / variant** — free text.
      Variant is for splitting one archetype into its builds, for example
      `Dragapult ex` with variant `Dusknoir` or `Dudunsparce`.
-   - **Game mode** — ranked or casual. The log doesn't record this, so leave it
-     on "Not recorded" if you don't know.
-   - **Rank points** — for ranked games, the points you had going *into* the
-     game. Entering points with the mode left blank saves the game as ranked.
+   - **Rank points** — the points you had going *into* the game. Leave it
+     blank for casual games: a game with points is a ranked game.
    - **Result** — leave it on "Read it from the log" unless the log is
      truncated or the game ended in a way the parser does not recognise.
 
@@ -139,7 +137,7 @@ app/
 scripts/
   backfill.py    Recompute derived fields across the whole archive
 tests/
-  test_app.py    36 tests covering parser, database, and routes
+  test_app.py    35 tests covering parser, database, and routes
   sample_log.txt A real log, used as the test fixture
 docs/            The documents listed above
 ```

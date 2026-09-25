@@ -23,8 +23,6 @@ DB_PATH = Path(os.environ.get("TCG_DB_PATH", "/data/games.db"))
 
 SCHEMA_VERSION = 2
 
-GAME_MODES = ("ranked", "casual")
-
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS games (
     id                 INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,7 +54,6 @@ CREATE TABLE IF NOT EXISTS schema_meta (
 # table, so init_db() adds whichever of these a database lacks. Every install,
 # new or old, gets them the same way, so they are defined only here.
 _ADDED_COLUMNS = {
-    "game_mode": "TEXT CHECK (game_mode IN ('ranked', 'casual') OR game_mode IS NULL)",
     "rank_points": "INTEGER CHECK (rank_points >= 0 OR rank_points IS NULL)",
 }
 
@@ -67,7 +64,6 @@ EDITABLE_FIELDS = {
     "opponents_deck",
     "opponents_variant",
     "result",
-    "game_mode",
     "rank_points",
 }
 
@@ -124,7 +120,6 @@ def insert_game(game: dict[str, Any]) -> int:
         "opponents_variant",
         "result",
         "turns",
-        "game_mode",
         "rank_points",
         "log_hash",
         "raw_log",
@@ -147,8 +142,8 @@ def list_games(limit: int = 100, offset: int = 0) -> list[sqlite3.Row]:
     with cursor() as cur:
         return cur.execute(
             "SELECT id, date, username, players_deck, players_variant, "
-            "opponents_deck, opponents_variant, result, turns, game_mode, "
-            "rank_points, created_at "
+            "opponents_deck, opponents_variant, result, turns, rank_points, "
+            "created_at "
             "FROM games ORDER BY date DESC, id DESC LIMIT ? OFFSET ?",
             (limit, offset),
         ).fetchall()

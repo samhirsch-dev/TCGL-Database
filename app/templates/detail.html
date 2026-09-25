@@ -22,15 +22,9 @@
       <div>{{ game.turns or "—" }}</div>
     </div>
     <div>
-      <label>Mode</label>
-      <div>{% if game.game_mode %}{{ game.game_mode | capitalize }}{% else %}Not recorded{% endif %}</div>
-    </div>
-    {% if game.game_mode == "ranked" %}
-    <div>
       <label>Rank points going in</label>
-      <div>{% if game.rank_points is not none %}{{ "{:,}".format(game.rank_points) }}{% else %}Not recorded{% endif %}</div>
+      <div>{% if game.rank_points is not none %}{{ "{:,}".format(game.rank_points) }}{% else %}Not ranked{% endif %}</div>
     </div>
-    {% endif %}
   </div>
 </div>
 
@@ -89,20 +83,8 @@
       <input type="text" id="opponents_variant" name="opponents_variant" value="{{ game.opponents_variant or '' }}">
     </div>
   </div>
-  <div class="row">
-    <div>
-      <label for="game_mode">Game mode</label>
-      <select id="game_mode" name="game_mode">
-        <option value="" {% if not game.game_mode %}selected{% endif %}>Not recorded</option>
-        <option value="ranked" {% if game.game_mode == "ranked" %}selected{% endif %}>Ranked</option>
-        <option value="casual" {% if game.game_mode == "casual" %}selected{% endif %}>Casual</option>
-      </select>
-    </div>
-    <div>
-      <label for="rank_points">Rank points going into this game (ranked only)</label>
-      <input type="number" id="rank_points" name="rank_points" min="0" step="1" inputmode="numeric" value="{{ game.rank_points if game.rank_points is not none else '' }}">
-    </div>
-  </div>
+  <label for="rank_points">Rank points going into this game (leave blank if not ranked)</label>
+  <input type="number" id="rank_points" name="rank_points" min="0" step="1" inputmode="numeric" value="{{ game.rank_points if game.rank_points is not none else '' }}">
   <div class="actions">
     <button type="submit">Save changes</button>
     <a class="btn secondary" href="/games/{{ game.id }}/raw">View raw log (plain text)</a>

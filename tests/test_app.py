@@ -298,10 +298,10 @@ def test_delete_removes_the_game(client):
     assert db.get_game(1) is None
 
 
-# --- ranked games -----------------------------------------------------------
+# --- rank points ------------------------------------------------------------
 
-def test_existing_database_gains_the_ranked_columns(tmp_path, monkeypatch):
-    """A database created before these columns existed is upgraded in place."""
+def test_existing_database_gains_the_rank_points_column(tmp_path, monkeypatch):
+    """A database created before the column existed is upgraded in place."""
     import sqlite3
 
     from app import db
@@ -326,7 +326,7 @@ def test_existing_database_gains_the_ranked_columns(tmp_path, monkeypatch):
 
     row = db.get_game(1)
     assert row["result"] == "W" and row["raw_log"] == "the log"
-    assert row["game_mode"] is None and row["rank_points"] is None
+    assert row["rank_points"] is None
 
 
 def _post(client, **fields):
@@ -334,83 +334,66 @@ def _post(client, **fields):
     return client.post("/games", data=data, follow_redirects=False)
 
 
-def test_ranked_game_stores_mode_and_points(client):
-    _post(client, game_mode="ranked", rank_points="1250")
+@pytest.mark.parametrize("points", ["1250", "0"])
+def test_rank_points_are_stored(client, points):
+    _post(client, rank_points=points)
     from app import db
 
-    row = db.list_games()[0]
-    assert row["game_mode"] == "ranked" and row["rank_points"] == 1250
+    assert db.list_games()[0]["rank_points"] == int(points)
 
 
-def test_points_without_a_mode_mark_the_game_ranked(client):
-    _post(client, rank_points="0")
-    from app import db
-
-    row = db.list_games()[0]
-    assert row["game_mode"] == "ranked" and row["rank_points"] == 0
-
-
-def test_mode_and_points_default_to_not_recorded(client):
+def test_rank_points_default_to_blank(client):
     _post(client)
     from app import db
 
-    row = db.list_games()[0]
-    assert row["game_mode"] is None and row["rank_points"] is None
+    assert db.list_games()[0]["rank_points"] is None
 
 
-def test_casual_game_with_points_is_rejected(client):
-    r = _post(client, game_mode="casual", rank_points="300")
-    assert "only+apply+to+ranked" in r.headers["location"]
+@pytest.mark.parametrize("points", ["-5", "12.5", "lots"])
+def test_invalid_rank_points_are_rejected(client, points):
+    r = _post(client, rank_points=points)
+    assert "whole+number" in r.headers["location"]
     from app import db
 
     assert db.list_games() == []
 
 
-@pytest.mark.parametrize("points", ["-5", "12.5", "lots"])
-def test_invalid_rank_points_are_rejected(client, points):
-    r = _post(client, game_mode="ranked", rank_points=points)
-    assert "whole+number" in r.headers["location"]
-
-
-def test_edit_sets_and_clears_ranked_fields(client):
+def test_edit_sets_and_clears_rank_points(client):
     _post(client)
     client.post(
         "/games/1/edit",
-        data={"date": "2026-09-20", "game_mode": "ranked", "rank_points": "900"},
+        data={"date": "2026-09-20", "rank_points": "900"},
         follow_redirects=False,
     )
     from app import db
 
-    row = db.get_game(1)
-    assert row["game_mode"] == "ranked" and row["rank_points"] == 900
+    assert db.get_game(1)["rank_points"] == 900
 
     client.post(
         "/games/1/edit",
-        data={"date": "2026-09-20", "game_mode": "casual", "rank_points": ""},
+        data={"date": "2026-09-20", "rank_points": ""},
         follow_redirects=False,
     )
-    row = db.get_game(1)
-    assert row["game_mode"] == "casual" and row["rank_points"] is None
+    assert db.get_game(1)["rank_points"] is None
 
 
 def test_invalid_edit_shows_an_error_and_changes_nothing(client):
-    _post(client, game_mode="ranked", rank_points="900")
+    _post(client, rank_points="900")
     r = client.post(
         "/games/1/edit",
-        data={"date": "2026-09-20", "game_mode": "casual", "rank_points": "500"},
+        data={"date": "2026-09-20", "rank_points": "lots"},
         follow_redirects=False,
     )
     assert r.headers["location"].startswith("/games/1?error=")
-    assert "only apply to ranked games" in client.get(r.headers["location"]).text
+    assert "whole number" in client.get(r.headers["location"]).text
     from app import db
 
-    row = db.get_game(1)
-    assert row["game_mode"] == "ranked" and row["rank_points"] == 900
+    assert db.get_game(1)["rank_points"] == 900
 
 
-def test_ranked_fields_appear_in_list_and_exports(client):
-    _post(client, game_mode="ranked", rank_points="1250")
+def test_rank_points_appear_in_list_and_exports(client):
+    _post(client, rank_points="1250")
     assert "1,250" in client.get("/").text
     csv_body = client.get("/export.csv").text
-    assert "game_mode,rank_points" in csv_body and "ranked,1250" in csv_body
+    assert "turns,rank_points" in csv_body and ",13,1250," in csv_body
     assert client.get("/api/games").json()["games"][0]["rank_points"] == 1250

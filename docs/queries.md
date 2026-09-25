@@ -16,18 +16,19 @@ FROM games;
 
 ## Ranked vs casual
 
+A game with rank points is ranked; one without is not.
+
 ```sql
-SELECT COALESCE(game_mode, '(not recorded)') AS mode,
+SELECT CASE WHEN rank_points IS NULL THEN 'casual' ELSE 'ranked' END AS mode,
        COUNT(*) AS games,
        SUM(result = 'W') AS wins,
        ROUND(100.0 * SUM(result = 'W') / COUNT(*), 1) AS win_pct
 FROM games
-GROUP BY mode
-ORDER BY games DESC;
+GROUP BY mode;
 ```
 
-Add `WHERE game_mode = 'ranked'` to any other query here to count only ranked
-games.
+Add `WHERE rank_points IS NOT NULL` to any other query here to count only
+ranked games.
 
 ## Rank points over time
 
@@ -38,7 +39,7 @@ next ranked game's points minus its own:
 SELECT date, id, result, rank_points,
        LEAD(rank_points) OVER (ORDER BY date, id) - rank_points AS change
 FROM games
-WHERE game_mode = 'ranked' AND rank_points IS NOT NULL
+WHERE rank_points IS NOT NULL
 ORDER BY date DESC, id DESC;
 ```
 

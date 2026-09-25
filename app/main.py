@@ -46,7 +46,6 @@ EXPORT_FIELDS = [
     "opponents_variant",
     "result",
     "turns",
-    "game_mode",
     "rank_points",
     "created_at",
 ]
@@ -78,25 +77,14 @@ def _error_redirect(message: str, path: str = "/") -> RedirectResponse:
     return RedirectResponse(f"{path}?{urlencode({'error': message})}", status_code=303)
 
 
-def _mode_and_points(game_mode: str, rank_points: str) -> tuple[Optional[str], Optional[int]]:
-    """Validate the ranked fields, raising ValueError with what to fix.
-
-    Points only exist in ranked play, so points entered with the mode left
-    blank are saved as a ranked game instead of being rejected.
-    """
-    mode = _clean(game_mode)
-    if mode is not None and mode not in db.GAME_MODES:
-        raise ValueError("Game mode must be ranked or casual.")
-    points = _clean(rank_points)
+def _rank_points(value: str) -> Optional[int]:
+    """Parse the rank points field; blank means the game wasn't ranked."""
+    points = _clean(value)
     if points is None:
-        return mode, None
+        return None
     if not points.isdigit():
         raise ValueError("Rank points must be a whole number, 0 or more.")
-    if mode == "casual":
-        raise ValueError(
-            "Rank points only apply to ranked games. Clear the points or set the mode to ranked."
-        )
-    return "ranked", int(points)
+    return int(points)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -125,7 +113,6 @@ def create_game(
     opponents_deck: str = Form(""),
     opponents_variant: str = Form(""),
     result: str = Form(""),
-    game_mode: str = Form(""),
     rank_points: str = Form(""),
 ):
     username = username.strip()
@@ -148,7 +135,7 @@ def create_game(
         return _error_redirect("Result must be W or L.")
 
     try:
-        mode, points = _mode_and_points(game_mode, rank_points)
+        points = _rank_points(rank_points)
     except ValueError as exc:
         return _error_redirect(str(exc))
 
@@ -161,7 +148,6 @@ def create_game(
         "opponents_variant": _clean(opponents_variant),
         "result": entered_result or parsed.result_for(username),
         "turns": parsed.turns,
-        "game_mode": mode,
         "rank_points": points,
         "log_hash": log_hash(raw_log),
         "raw_log": raw_log,
@@ -200,11 +186,10 @@ def edit_game(
     opponents_deck: str = Form(""),
     opponents_variant: str = Form(""),
     result: str = Form(""),
-    game_mode: str = Form(""),
     rank_points: str = Form(""),
 ):
     try:
-        mode, points = _mode_and_points(game_mode, rank_points)
+        points = _rank_points(rank_points)
     except ValueError as exc:
         return _error_redirect(str(exc), f"/games/{game_id}")
     db.update_game(
@@ -216,7 +201,6 @@ def edit_game(
             "opponents_deck": _clean(opponents_deck),
             "opponents_variant": _clean(opponents_variant),
             "result": _clean(result),
-            "game_mode": mode,
             "rank_points": points,
         },
     )
